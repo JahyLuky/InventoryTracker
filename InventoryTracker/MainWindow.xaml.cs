@@ -1,5 +1,5 @@
 ﻿using InventoryTracker.Models;
-using InventoryTracker.Utilities;
+using InventoryTracker.UI;
 using InventoryTracker.ViewModels;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -21,7 +21,7 @@ namespace InventoryTracker
             InitializeComponent();
             InitializeViewModel();
             InitializeDatabase();
-            _userService = new UserService(); // Instantiate UserService
+            _userService = new UserService();
             DataContext = _viewModel;
         }
 
@@ -246,6 +246,45 @@ namespace InventoryTracker
             }
         }
 
+        private void RegistrationButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (_currentUser != null)
+                {
+                    MessageBox.Show("User already logged in.");
+                    return;
+                }
+
+                // Create an instance of the UserRegistrationWindow
+                UserRegistrationWindow registrationWindow = new UserRegistrationWindow();
+
+                //TODO: delete
+                var userListWindow = new UserRegistrationWindow();
+
+                // Show the registration window as a dialog
+                bool? result = registrationWindow.ShowDialog();
+
+                // Check the result of the dialog
+                if (result == true)
+                {
+                    // Registration was successful
+                    MessageBox.Show("User registered successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    // Registration was cancelled
+                    MessageBox.Show("Registration was cancelled.", "Cancelled", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Exception occurred during registration: {ex.Message}");
+                MessageBox.Show($"Error during registration: {ex.Message}");
+            }
+        }
+
+
         private void LoginButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -297,6 +336,8 @@ namespace InventoryTracker
 
                 _currentUser = null;
                 _viewModel.IsLoggedIn = false;
+                UsernameTextBox.Text = null;
+                PasswordTextBox.Password = null;
 
                 SessionInfoTextBlock.Text = "Logged out";
 

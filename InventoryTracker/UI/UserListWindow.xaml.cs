@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Windows;
 
-namespace InventoryTracker.Utilities
+namespace InventoryTracker.UI
 {
     /// <summary>
     /// Interaction logic for UserListWindow.xaml

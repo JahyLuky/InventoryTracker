@@ -4,7 +4,6 @@
         xmlns:local="clr-namespace:InventoryTracker.Utilities"
         Title="InventoryTracker" Height="600" Width="800"
         DataContext="{Binding RelativeSource={RelativeSource Self}}">
-    <!-- Window resources for reusable components -->
     <Window.Resources>
         <!-- Define the VisibilityConverter for use in XAML bindings -->
         <local:VisibilityConverter x:Key="VisibilityConverter" />
@@ -19,7 +18,6 @@
 
         <!-- Header Section -->
         <Border Grid.Row="0" Background="LightBlue" Padding="10">
-            <!-- Title of the application -->
             <TextBlock Text="Inventory Tracker" FontSize="24" FontWeight="Bold" />
         </Border>
 
@@ -36,28 +34,33 @@
             </StackPanel.Resources>
 
             <!-- Username Input Section -->
-            <StackPanel Orientation="Horizontal" Margin="0,0,10,0">
-                <!-- Label for Username -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,10,0"
+                        Visibility="{Binding IsLoggedIn, Converter={StaticResource VisibilityConverter}, ConverterParameter=IsLoggedOut}">
                 <TextBlock Text="Username" VerticalAlignment="Center" Margin="5"/>
-                <!-- TextBox for entering username -->
                 <TextBox x:Name="UsernameTextBox" Width="100"/>
             </StackPanel>
 
             <!-- Password Input Section -->
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,0">
-                <!-- Label for Password -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,0"
+                        Visibility="{Binding IsLoggedIn, Converter={StaticResource VisibilityConverter}, ConverterParameter=IsLoggedOut}">
                 <TextBlock Text="Password" VerticalAlignment="Center" Margin="5"/>
-                <!-- PasswordBox for entering password -->
-                <PasswordBox x:Name="PasswordTextBox" Width="100" Margin="5" />
+                <PasswordBox x:Name="PasswordTextBox" Width="100" Margin="5"/>
             </StackPanel>
 
-            <!-- Login and Logout Buttons, and Session Info -->
+            <!-- Registration and Login Buttons -->
             <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
-                <!-- Login Button -->
-                <Button Content="Login" Click="LoginButton_Click" Margin="5" />
-                <!-- Logout Button -->
-                <Button Content="Logout" Click="LogoutButton_Click" Margin="5" />
-                <!-- TextBlock to show session info -->
+                <Button Content="Login" 
+                        Click="LoginButton_Click" 
+                        Margin="5" 
+                        Visibility="{Binding IsLoggedIn, Converter={StaticResource VisibilityConverter}, ConverterParameter=IsLoggedOut}" />
+                <Button Content="Registration" 
+                        Click="RegistrationButton_Click" 
+                        Margin="5" 
+                        Visibility="{Binding IsLoggedIn, Converter={StaticResource VisibilityConverter}, ConverterParameter=IsLoggedOut}" />
+                <Button Content="Logout" 
+                        Click="LogoutButton_Click" 
+                        Margin="5" 
+                        Visibility="{Binding IsLoggedIn, Converter={StaticResource VisibilityConverter}, ConverterParameter=IsLoggedIn}" />
                 <TextBlock x:Name="SessionInfoTextBlock" VerticalAlignment="Center" Margin="10"/>
             </StackPanel>
         </StackPanel>
@@ -71,34 +74,26 @@
             </Grid.ColumnDefinitions>
 
             <!-- Sidebar / Navigation Pane -->
-            <Border Grid.Column="0" Background="#E0E0E0" Padding="10" Visibility="{Binding IsLoggedIn, Converter={StaticResource VisibilityConverter}}">
+            <Border Grid.Column="0" Background="#E0E0E0" Padding="10" Visibility="{Binding IsLoggedIn, Converter={StaticResource VisibilityConverter}, ConverterParameter=IsLoggedIn}">
                 <StackPanel>
-                    <!-- Button to add a new item -->
                     <Button Content="Add Item" Margin="0,0,0,10" Click="AddItem_Click" />
-                    <!-- Button to delete an item -->
                     <Button Content="Delete Item" Margin="0,0,0,10" Click="DeleteItem_Click" />
-                    <!-- Button to show usernames (admin feature) -->
                     <Button Content="Show Usernames" Margin="0,0,0,10" Click="AdminButton_Click" />
                 </StackPanel>
             </Border>
 
             <!-- Placeholder Content for Not Logged In State -->
-            <Border Grid.Column="1" Background="White" Padding="10" Visibility="{Binding IsLoggedIn, Converter={StaticResource VisibilityConverter}, ConverterParameter=Inverse}">
-                <!-- Message prompting user to log in -->
+            <Border Grid.Column="1" Background="White" Padding="10" Visibility="{Binding IsLoggedIn, Converter={StaticResource VisibilityConverter}, ConverterParameter=IsLoggedIn}">
                 <TextBlock Text="Please log in to view your data." FontSize="18" />
             </Border>
 
             <!-- Main DataGrid for Logged In State -->
-            <Border Grid.Column="1" Background="White" Padding="10" Visibility="{Binding IsLoggedIn, Converter={StaticResource VisibilityConverter}}">
-                <!-- DataGrid displaying inventory items -->
+            <Border Grid.Column="1" Background="White" Padding="10" Visibility="{Binding IsLoggedIn, Converter={StaticResource VisibilityConverter}, ConverterParameter=IsLoggedIn}">
                 <DataGrid x:Name="dataGrid" AutoGenerateColumns="False" ItemsSource="{Binding InventoryItems}" Margin="0"
                           IsReadOnly="False" CellEditEnding="DataGrid_CellEditEnding">
                     <!-- Columns for DataGrid -->
                     <DataGrid.Columns>
-                        <!-- ID Column (Read-Only) -->
                         <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50" IsReadOnly="True" />
-
-                        <!-- Name Column (Editable) -->
                         <DataGridTextColumn Header="Name" Binding="{Binding Name, Mode=TwoWay}" Width="*">
                             <DataGridTextColumn.HeaderTemplate>
                                 <DataTemplate>
@@ -110,8 +105,6 @@
                                 </DataTemplate>
                             </DataGridTextColumn.HeaderTemplate>
                         </DataGridTextColumn>
-
-                        <!-- Quantity Column (Editable) -->
                         <DataGridTextColumn Header="Quantity" Binding="{Binding Quantity, Mode=TwoWay}" Width="100">
                             <DataGridTextColumn.HeaderTemplate>
                                 <DataTemplate>
@@ -123,8 +116,6 @@
                                 </DataTemplate>
                             </DataGridTextColumn.HeaderTemplate>
                         </DataGridTextColumn>
-
-                        <!-- Price Column (Editable) -->
                         <DataGridTextColumn Header="Price" Binding="{Binding Price, Mode=TwoWay}" Width="100">
                             <DataGridTextColumn.HeaderTemplate>
                                 <DataTemplate>
@@ -141,10 +132,8 @@
             </Border>
 
             <!-- Save and Cancel Buttons -->
-            <StackPanel Grid.Column="2" VerticalAlignment="Top" Margin="10" Visibility="{Binding IsLoggedIn, Converter={StaticResource VisibilityConverter}}" >
-                <!-- Button to save changes -->
+            <StackPanel Grid.Column="2" VerticalAlignment="Top" Margin="10" Visibility="{Binding IsLoggedIn, Converter={StaticResource VisibilityConverter}, ConverterParameter=IsLoggedIn}" >
                 <Button Content="Save" Click="SaveChanges_Click" Width="75" />
-                <!-- Button to cancel changes -->
                 <Button Content="Cancel" Click="CancelChanges_Click" Width="75" Margin="0,5,0,0" />
             </StackPanel>
         </Grid>
