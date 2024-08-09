@@ -1,0 +1,9 @@
+﻿<Application x:Class="InventoryTracker.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:InventoryTracker.ViewModels"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <local:MainViewModel x:Key="MainViewModel" />
+    </Application.Resources>
+</Application>
