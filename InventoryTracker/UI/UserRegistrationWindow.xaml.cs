@@ -1,9 +1,12 @@
-﻿using System.Windows;
+﻿using InventoryTracker.Models;
+using System.Windows;
 
 namespace InventoryTracker.UI
 {
     public partial class UserRegistrationWindow : Window
     {
+        private UserService _userService;
+
         public UserRegistrationWindow()
         {
             InitializeComponent();
@@ -16,28 +19,23 @@ namespace InventoryTracker.UI
             string password = RegistrationPasswordBox.Password;
             string confirmPassword = RegistrationConfirmPasswordBox.Password;
 
-            // Check if the passwords match
             if (password == confirmPassword)
             {
-                // Handle the registration logic here (e.g., save user to database)
-                MessageBox.Show("Registration successful!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                // Set DialogResult to true to indicate success
-                this.DialogResult = true;
-                this.Close();
+                _userService = new UserService();
+                _userService.CreateUser(username, password, "user");
+                DialogResult = true;
+                Close();
             }
             else
             {
-                // Show an error message if passwords do not match
                 MessageBox.Show("Passwords do not match!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private void RegistrationCancelButton_Click(object sender, RoutedEventArgs e)
         {
-            // Set DialogResult to false to indicate cancellation
-            this.DialogResult = false;
-            this.Close();
+            DialogResult = false;
+            Close();
         }
     }
 }

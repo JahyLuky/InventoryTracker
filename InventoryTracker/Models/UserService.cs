@@ -1,4 +1,5 @@
 ﻿using System.Data.SQLite;
+using System.Diagnostics;
 using System.IO;
 
 namespace InventoryTracker.Models
@@ -20,7 +21,7 @@ namespace InventoryTracker.Models
             _dbConnectionString = $"Data Source={GetDatabasePath()};Version=3;";
             InitializeDatabase();
             _passwordHasher = new PasswordHasher();
-            InitializeUsers(); // Initialize hardcoded users
+            //InitializeUsers(); // Initialize hardcoded users
         }
 
         /// <summary>
@@ -141,6 +142,10 @@ namespace InventoryTracker.Models
             using (var connection = new SQLiteConnection(_dbConnectionString))
             {
                 connection.Open();
+                if (UsernameExists(connection, username))
+                {
+                    return false;
+                }
                 return CreateUser(connection, username, hashedPassword, salt, role);
             }
         }
@@ -170,7 +175,7 @@ namespace InventoryTracker.Models
                 try
                 {
                     cmd.ExecuteNonQuery();
-                    return true; // User created successfully
+                    return true;
                 }
                 catch (SQLiteException ex)
                 {
@@ -289,6 +294,7 @@ namespace InventoryTracker.Models
             {
                 cmd.Parameters.AddWithValue("@Username", username);
                 long count = (long)cmd.ExecuteScalar();
+                Debug.WriteLine($"!!!!!!!!!! Username: {username}, Count: {count}");
                 return count > 0;
             }
         }
