@@ -51,8 +51,10 @@
                 <PasswordBox x:Name="PasswordTextBox" Width="100" Margin="5" />
             </StackPanel>
 
-            <!-- Login and Logout Buttons, and Session Info -->
+            <!-- Registration, Login and Logout Buttons, and Session Info -->
             <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
+                <!-- Registration Button -->
+                <Button Content="Registration" Click="RegistrationButton_Click" Margin="5" />
                 <!-- Login Button -->
                 <Button Content="Login" Click="LoginButton_Click" Margin="5" />
                 <!-- Logout Button -->

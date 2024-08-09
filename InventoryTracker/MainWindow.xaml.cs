@@ -21,7 +21,7 @@ namespace InventoryTracker
             InitializeComponent();
             InitializeViewModel();
             InitializeDatabase();
-            _userService = new UserService(); // Instantiate UserService
+            _userService = new UserService();
             DataContext = _viewModel;
         }
 
@@ -243,6 +243,51 @@ namespace InventoryTracker
             {
                 Debug.WriteLine($"Exception occurred while canceling changes: {ex.Message}");
                 MessageBox.Show($"Error canceling changes: {ex.Message}");
+            }
+        }
+
+        private void RegistrationButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (_currentUser != null)
+                {
+                    MessageBox.Show("User logged in.");
+                    return;
+                }
+
+                string username = UsernameTextBox.Text;
+                string password = PasswordTextBox.Password;
+
+                if ((username != null && password != null) && (username != "" && password != ""))
+                {
+                    _currentUser = new User();
+                    if (username == "admin")
+                    {
+                        _userService.CreateUser(username, password, "admin");
+                    }
+                    else
+                    {
+                        _userService.CreateUser(username, password, "user");
+                    }
+                    _userService.CurrentUserId = _currentUser.UserId;
+
+                    SessionInfoTextBlock.Text = $"Logged in as {_currentUser.Username}";
+
+                    _viewModel.IsLoggedIn = true;
+                    LoadItemsFromDatabase();
+                    //var userListWindow = new UserListWindow();
+                    //userListWindow.ShowDialog();
+                }
+                else
+                {
+                    MessageBox.Show("Empty username or password for registration. Please try again.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Exception occurred during registration: {ex.Message}");
+                MessageBox.Show($"Error during registration: {ex.Message}");
             }
         }
 
