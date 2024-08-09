@@ -259,9 +259,6 @@ namespace InventoryTracker
                 // Create an instance of the UserRegistrationWindow
                 UserRegistrationWindow registrationWindow = new UserRegistrationWindow();
 
-                //TODO: delete
-                var userListWindow = new UserRegistrationWindow();
-
                 // Show the registration window as a dialog
                 bool? result = registrationWindow.ShowDialog();
 
