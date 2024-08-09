@@ -1,4 +1,5 @@
 ﻿using InventoryTracker.Models;
+using System.Diagnostics;
 using System.Windows;
 
 namespace InventoryTracker.UI
@@ -22,9 +23,17 @@ namespace InventoryTracker.UI
             if (password == confirmPassword)
             {
                 _userService = new UserService();
-                _userService.CreateUser(username, password, "user");
-                DialogResult = true;
-                Close();
+                bool UserCreated = _userService.CreateUser(username, password, "user");
+                Debug.WriteLine($"!!!!!!!!!! Username: {username}, UserCreated: {UserCreated}");
+                if (UserCreated)
+                {
+                    DialogResult = true;
+                    Close();
+                }
+                else
+                {
+                    MessageBox.Show("Username already in use!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
             }
             else
             {
