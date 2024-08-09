@@ -21,7 +21,7 @@ namespace InventoryTracker.Models
             _dbConnectionString = $"Data Source={GetDatabasePath()};Version=3;";
             InitializeDatabase();
             _passwordHasher = new PasswordHasher();
-            //InitializeUsers(); // Initialize hardcoded users
+            InitializeAdmin(); // Initialize hardcoded admin
         }
 
         /// <summary>
@@ -102,22 +102,13 @@ namespace InventoryTracker.Models
         }
 
         /// <summary>
-        /// Initializes hardcoded users in the database.
+        /// Initializes hardcoded admin in the database.
         /// </summary>
-        private void InitializeUsers()
+        private void InitializeAdmin()
         {
             using (var connection = new SQLiteConnection(_dbConnectionString))
             {
                 connection.Open();
-
-                // Check if users already exist
-                if (!UsernameExists(connection, "user"))
-                {
-                    string salt;
-                    string hashedPassword = _passwordHasher.HashPassword("user", out salt);
-                    CreateUser(connection, "user", hashedPassword, salt, "User");
-                }
-
                 if (!UsernameExists(connection, "admin"))
                 {
                     string salt;
@@ -179,7 +170,6 @@ namespace InventoryTracker.Models
                 }
                 catch (SQLiteException ex)
                 {
-                    // Handle SQLiteException (e.g., username already exists)
                     Console.WriteLine($"Error creating user: {ex.Message}");
                     return false;
                 }
