@@ -15,4 +15,4 @@ Inventory Tracker is a simple WPF application designed to manage inventory items
 - **WPF (Windows Presentation Foundation):** Used for building the graphical user interface.
 - **SQLite:** Lightweight, embedded database for storing inventory data.
 - **Visual Studio 2022:** Integrated development environment (IDE) used for coding and debugging.
-- **GitHub:** Used for branching and commiting each new feature, bugfix and version
+- **GitHub:** Used for branching and commiting each new feature, bugfix and more. I used [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) method.
