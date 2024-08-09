@@ -29,7 +29,6 @@ namespace InventoryTracker
         {
             _viewModel = new MainViewModel();
             _viewModel.InventoryItems = new ObservableCollection<InventoryItem>();
-            _viewModel.IsLoggedOut = true;
         }
 
         private void InitializeDatabase()
@@ -308,7 +307,6 @@ namespace InventoryTracker
                     SessionInfoTextBlock.Text = $"Logged in as {_currentUser.Username}";
 
                     _viewModel.IsLoggedIn = true;
-                    _viewModel.IsLoggedOut = false;
                     LoadItemsFromDatabase();
                 }
                 else
@@ -338,7 +336,8 @@ namespace InventoryTracker
 
                 _currentUser = null;
                 _viewModel.IsLoggedIn = false;
-                _viewModel.IsLoggedIn = true;
+                UsernameTextBox.Text = null;
+                PasswordTextBox.Password = null;
 
                 SessionInfoTextBlock.Text = "Logged out";
 
