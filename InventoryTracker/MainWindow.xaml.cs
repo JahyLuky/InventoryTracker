@@ -1,5 +1,5 @@
 ﻿using InventoryTracker.Models;
-using InventoryTracker.Utilities;
+using InventoryTracker.UI;
 using InventoryTracker.ViewModels;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -29,6 +29,7 @@ namespace InventoryTracker
         {
             _viewModel = new MainViewModel();
             _viewModel.InventoryItems = new ObservableCollection<InventoryItem>();
+            _viewModel.IsLoggedOut = true;
         }
 
         private void InitializeDatabase()
@@ -252,36 +253,29 @@ namespace InventoryTracker
             {
                 if (_currentUser != null)
                 {
-                    MessageBox.Show("User logged in.");
+                    MessageBox.Show("User already logged in.");
                     return;
                 }
 
-                string username = UsernameTextBox.Text;
-                string password = PasswordTextBox.Password;
+                // Create an instance of the UserRegistrationWindow
+                UserRegistrationWindow registrationWindow = new UserRegistrationWindow();
 
-                if ((username != null && password != null) && (username != "" && password != ""))
+                //TODO: delete
+                var userListWindow = new UserRegistrationWindow();
+
+                // Show the registration window as a dialog
+                bool? result = registrationWindow.ShowDialog();
+
+                // Check the result of the dialog
+                if (result == true)
                 {
-                    _currentUser = new User();
-                    if (username == "admin")
-                    {
-                        _userService.CreateUser(username, password, "admin");
-                    }
-                    else
-                    {
-                        _userService.CreateUser(username, password, "user");
-                    }
-                    _userService.CurrentUserId = _currentUser.UserId;
-
-                    SessionInfoTextBlock.Text = $"Logged in as {_currentUser.Username}";
-
-                    _viewModel.IsLoggedIn = true;
-                    LoadItemsFromDatabase();
-                    //var userListWindow = new UserListWindow();
-                    //userListWindow.ShowDialog();
+                    // Registration was successful
+                    MessageBox.Show("User registered successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
                 {
-                    MessageBox.Show("Empty username or password for registration. Please try again.");
+                    // Registration was cancelled
+                    MessageBox.Show("Registration was cancelled.", "Cancelled", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
@@ -290,6 +284,7 @@ namespace InventoryTracker
                 MessageBox.Show($"Error during registration: {ex.Message}");
             }
         }
+
 
         private void LoginButton_Click(object sender, RoutedEventArgs e)
         {
@@ -313,6 +308,7 @@ namespace InventoryTracker
                     SessionInfoTextBlock.Text = $"Logged in as {_currentUser.Username}";
 
                     _viewModel.IsLoggedIn = true;
+                    _viewModel.IsLoggedOut = false;
                     LoadItemsFromDatabase();
                 }
                 else
@@ -342,6 +338,7 @@ namespace InventoryTracker
 
                 _currentUser = null;
                 _viewModel.IsLoggedIn = false;
+                _viewModel.IsLoggedIn = true;
 
                 SessionInfoTextBlock.Text = "Logged out";
 

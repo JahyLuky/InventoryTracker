@@ -10,6 +10,7 @@ namespace InventoryTracker.ViewModels
     public class MainViewModel : INotifyPropertyChanged
     {
         private bool _isLoggedIn;
+        private bool _isLoggedOut;
         private bool _isAdmin;
 
         /// <summary>
@@ -22,6 +23,20 @@ namespace InventoryTracker.ViewModels
             {
                 _isLoggedIn = value;
                 OnPropertyChanged(nameof(IsLoggedIn));
+                OnPropertyChanged(nameof(CanAddDeleteItem)); // Notify that CanAddDeleteItem property may have changed
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the user is logged in.
+        /// </summary>
+        public bool IsLoggedOut
+        {
+            get { return _isLoggedOut; }
+            set
+            {
+                _isLoggedOut = value;
+                OnPropertyChanged(nameof(_isLoggedOut));
                 OnPropertyChanged(nameof(CanAddDeleteItem)); // Notify that CanAddDeleteItem property may have changed
             }
         }
