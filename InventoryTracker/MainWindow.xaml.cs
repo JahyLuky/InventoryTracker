@@ -14,7 +14,7 @@ namespace InventoryTracker
         private InventoryDatabase _database;
         private MainViewModel _viewModel;
         private UserService _userService;
-        private AppUser _currentUser;
+        private User _currentUser;
 
         public MainWindow()
         {
@@ -263,7 +263,7 @@ namespace InventoryTracker
                 bool loggedIn = _userService.Login(username, password, out bool isAdmin);
                 if (loggedIn)
                 {
-                    _currentUser = new AppUser { Username = username };
+                    _currentUser = new User { Username = username };
                     _userService.CurrentUserId = _currentUser.UserId;
                     SessionInfoTextBlock.Text = $"Logged in as {_currentUser.Username}";
 

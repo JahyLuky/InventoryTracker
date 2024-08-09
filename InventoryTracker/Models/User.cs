@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents an application user.
     /// </summary>
-    public class AppUser
+    public class User
     {
         /// <summary>
         /// Gets or sets the user ID.
@@ -21,20 +21,20 @@
         public bool IsAdmin { get; set; }  // New property to indicate admin status
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AppUser"/> class.
+        /// Initializes a new instance of the <see cref="User"/> class.
         /// </summary>
-        public AppUser()
+        public User()
         {
             // Default constructor
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AppUser"/> class with specified values.
+        /// Initializes a new instance of the <see cref="User"/> class with specified values.
         /// </summary>
         /// <param name="userId">The user ID.</param>
         /// <param name="username">The username.</param>
         /// <param name="isAdmin">A value indicating whether the user is an administrator.</param>
-        public AppUser(long userId, string username, bool isAdmin)
+        public User(long userId, string username, bool isAdmin)
         {
             UserId = userId;
             Username = username;
