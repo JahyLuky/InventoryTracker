@@ -36,7 +36,7 @@ namespace InventoryTracker
             try
             {
                 _database = new InventoryDatabase();
-                LoadItemsFromDatabase();
+                //LoadItemsFromDatabase();
             }
             catch (Exception ex)
             {
@@ -49,7 +49,7 @@ namespace InventoryTracker
         {
             try
             {
-                var itemsFromDb = _database.GetAllItems();
+                var itemsFromDb = _database.GetAllItems(_currentUser.UserId);
                 _viewModel.InventoryItems.Clear();
                 foreach (var item in itemsFromDb)
                 {
@@ -64,6 +64,7 @@ namespace InventoryTracker
                 MessageBox.Show($"Error loading items from database: {ex.Message}");
             }
         }
+
 
         private void DataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
@@ -92,7 +93,7 @@ namespace InventoryTracker
                                 break;
                         }
 
-                        _database.UpdateItem(editedItem);
+                        _database.UpdateItem(editedItem, _currentUser.UserId);
                     }
                 }
             }
@@ -181,7 +182,7 @@ namespace InventoryTracker
                     Price = 0.0
                 };
 
-                _database.AddItem(newItem);
+                _database.AddItem(newItem, _currentUser.UserId);
 
                 newItem = _database.GetItem(newItem.Id);
 
@@ -201,7 +202,7 @@ namespace InventoryTracker
                 if (selectedRow != null)
                 {
                     _viewModel.DeleteItem(selectedRow.Id);
-                    _database.DeleteItem(selectedRow.Id);
+                    _database.DeleteItem(selectedRow.Id, _currentUser.UserId);
                 }
             }
             catch (Exception ex)
@@ -217,7 +218,7 @@ namespace InventoryTracker
             {
                 foreach (var updatedItem in _viewModel.InventoryItems)
                 {
-                    _database.UpdateItem(updatedItem);
+                    _database.UpdateItem(updatedItem, _currentUser.UserId);
                 }
 
                 LoadItemsFromDatabase();
@@ -306,10 +307,14 @@ namespace InventoryTracker
                 if (loggedIn)
                 {
                     _currentUser = new User { Username = username };
+                    _currentUser.UserId = _userService.GetUserID(_currentUser.Username);
                     _userService.CurrentUserId = _currentUser.UserId;
                     SessionInfoTextBlock.Text = $"Logged in as {_currentUser.Username}";
 
                     _viewModel.IsLoggedIn = true;
+
+                    Debug.WriteLine($"\n\n!!!!!!!!!!!!!!!!! _currentUser.UserId {_currentUser.UserId}\n\n");
+
                     LoadItemsFromDatabase();
                 }
                 else
