@@ -113,7 +113,7 @@ namespace InventoryTracker.Models
                 }
             }
 
-            return null; // Or throw exception if item not found
+            throw new Exception(); // Or throw exception if item not found
         }
 
         /// <summary>

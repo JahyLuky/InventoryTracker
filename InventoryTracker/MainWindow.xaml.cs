@@ -106,7 +106,12 @@ namespace InventoryTracker
         private void Sort_Click(object sender, RoutedEventArgs e)
         {
             Button button = sender as Button;
-            string tag = button?.Tag as string;
+            if (button == null)
+            {
+                throw new Exception("Button is null");
+            }
+
+            string tag = button.Tag as string;
 
             // Determine sorting direction
             ListSortDirection direction = ListSortDirection.Ascending;
@@ -117,20 +122,22 @@ namespace InventoryTracker
 
             // Determine which column to sort based on button's Tag property
             string propertyName = null;
-            switch (tag)
+
+            if (tag == "NameAsc" || tag == "NameDesc")
             {
-                case "NameAsc":
-                case "NameDesc":
-                    propertyName = "Name";
-                    break;
-                case "QuantityAsc":
-                case "QuantityDesc":
-                    propertyName = "Quantity";
-                    break;
-                case "PriceAsc":
-                case "PriceDesc":
-                    propertyName = "Price";
-                    break;
+                propertyName = "Name";
+            }
+            else if (tag == "QuantityAsc" || tag == "QuantityDesc")
+            {
+                propertyName = "Quantity";
+            }
+            else if (tag == "PriceAsc" || tag == "PriceDesc")
+            {
+                propertyName = "Price";
+            }
+            else
+            {
+                Debug.WriteLine("Unable to sort.");
             }
 
             // Perform sorting
@@ -182,7 +189,6 @@ namespace InventoryTracker
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception occurred while adding item: {ex.Message}");
                 MessageBox.Show($"Error adding item: {ex.Message}");
             }
         }
