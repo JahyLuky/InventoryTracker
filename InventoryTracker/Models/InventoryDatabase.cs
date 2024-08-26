@@ -1,4 +1,5 @@
 ﻿using System.Data.SQLite;
+using System.Diagnostics;
 using System.IO;
 
 namespace InventoryTracker.Models
@@ -54,34 +55,42 @@ namespace InventoryTracker.Models
         {
             string sql = @"
                 CREATE TABLE IF NOT EXISTS Inventory (
-                Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                Name TEXT NOT NULL,
-                Quantity INTEGER NOT NULL,
-                Price REAL NOT NULL
-            );";
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Name TEXT NOT NULL,
+                    Quantity INTEGER NOT NULL,
+                    Price REAL NOT NULL,
+                    UserId INTEGER NOT NULL,
+                    FOREIGN KEY(UserId) REFERENCES Users(UserId) ON DELETE CASCADE
+                );";
 
             ExecuteNonQuery(sql);
         }
+
 
         /// <summary>
         /// Adds a new inventory item to the database.
         /// </summary>
         /// <param name="newItem">The new inventory item to add.</param>
-        public void AddItem(InventoryItem newItem)
+        public void AddItem(InventoryItem newItem, long userId)
         {
-            string sql = "INSERT INTO Inventory (Name, Quantity, Price) VALUES (@Name, @Quantity, @Price); SELECT last_insert_rowid();";
+            string sql = "INSERT INTO Inventory (Name, Quantity, Price, UserId) VALUES (@Name, @Quantity, @Price, @UserId); SELECT last_insert_rowid();";
 
             using (SQLiteCommand cmd = new SQLiteCommand(sql, _connection))
             {
                 cmd.Parameters.AddWithValue("@Name", newItem.Name);
                 cmd.Parameters.AddWithValue("@Quantity", newItem.Quantity);
                 cmd.Parameters.AddWithValue("@Price", newItem.Price);
+                cmd.Parameters.AddWithValue("@UserId", userId);
 
-                // Execute the INSERT command and retrieve the last inserted row id
                 int newId = Convert.ToInt32(cmd.ExecuteScalar());
-                newItem.Id = newId; // Update the Id of newItem with the newly assigned Id
+                if (newId <= 0)
+                {
+                    Debug.WriteLine($"\n\n!!!!!!!!!!newID = {newId}\n\n");
+                }
+                newItem.Id = newId;
             }
         }
+
 
         /// <summary>
         /// Retrieves an inventory item from the database by its ID.
@@ -113,16 +122,16 @@ namespace InventoryTracker.Models
                 }
             }
 
-            return null; // Or throw exception if item not found
+            throw new Exception();
         }
 
         /// <summary>
         /// Updates an existing inventory item in the database.
         /// </summary>
         /// <param name="updatedItem">The updated inventory item.</param>
-        public void UpdateItem(InventoryItem updatedItem)
+        public void UpdateItem(InventoryItem updatedItem, long userId)
         {
-            string sql = "UPDATE Inventory SET Name = @Name, Quantity = @Quantity, Price = @Price WHERE Id = @Id;";
+            string sql = "UPDATE Inventory SET Name = @Name, Quantity = @Quantity, Price = @Price WHERE Id = @Id AND UserId = @UserId;";
 
             using (SQLiteCommand cmd = new SQLiteCommand(sql, _connection))
             {
@@ -130,6 +139,7 @@ namespace InventoryTracker.Models
                 cmd.Parameters.AddWithValue("@Quantity", updatedItem.Quantity);
                 cmd.Parameters.AddWithValue("@Price", updatedItem.Price);
                 cmd.Parameters.AddWithValue("@Id", updatedItem.Id);
+                cmd.Parameters.AddWithValue("@UserId", userId);
 
                 cmd.ExecuteNonQuery();
             }
@@ -139,13 +149,14 @@ namespace InventoryTracker.Models
         /// Deletes an inventory item from the database by its ID.
         /// </summary>
         /// <param name="itemId">The ID of the inventory item to delete.</param>
-        public void DeleteItem(int itemId)
+        public void DeleteItem(int itemId, long userId)
         {
-            string sql = "DELETE FROM Inventory WHERE Id = @Id;";
+            string sql = "DELETE FROM Inventory WHERE Id = @Id AND UserId = @UserId;";
 
             using (SQLiteCommand cmd = new SQLiteCommand(sql, _connection))
             {
                 cmd.Parameters.AddWithValue("@Id", itemId);
+                cmd.Parameters.AddWithValue("@UserId", userId);
 
                 cmd.ExecuteNonQuery();
             }
@@ -155,14 +166,16 @@ namespace InventoryTracker.Models
         /// Retrieves all inventory items from the database.
         /// </summary>
         /// <returns>A list of all inventory items.</returns>
-        public List<InventoryItem> GetAllItems()
+        public List<InventoryItem> GetAllItems(long userId)
         {
             List<InventoryItem> items = new List<InventoryItem>();
 
-            string sql = "SELECT Id, Name, Quantity, Price FROM Inventory;";
+            string sql = "SELECT Id, Name, Quantity, Price FROM Inventory WHERE UserId = @UserId;";
 
             using (SQLiteCommand cmd = new SQLiteCommand(sql, _connection))
             {
+                cmd.Parameters.AddWithValue("@UserId", userId);
+
                 using (SQLiteDataReader reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
@@ -182,6 +195,7 @@ namespace InventoryTracker.Models
 
             return items;
         }
+
 
         /// <summary>
         /// Executes a non-query SQL command on the database.

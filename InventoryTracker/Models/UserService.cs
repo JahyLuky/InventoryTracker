@@ -176,6 +176,34 @@ namespace InventoryTracker.Models
             }
         }
 
+        public long GetUserID(string username)
+        {
+            string sql = "SELECT UserId FROM Users WHERE Username = @Username;";
+            using (var connection = new SQLiteConnection(_dbConnectionString))
+            {
+                connection.Open();
+
+                using (SQLiteCommand cmd = new SQLiteCommand(sql, connection))
+                {
+                    cmd.Parameters.AddWithValue("@Username", username);
+
+                    using (SQLiteDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            object userIdObj = reader["UserId"];
+                            if (userIdObj != DBNull.Value)
+                            {
+                                return Convert.ToInt64(userIdObj);
+                            }
+                        }
+                    }
+                }
+            }
+            return 0;
+        }
+
+
         /// <summary>
         /// Attempts to log in a user with the specified username and password.
         /// </summary>
