@@ -172,7 +172,7 @@ namespace InventoryTracker
                     return;
                 }
 
-                InventoryItem newItem = new InventoryItem(0, "New Item", 0, 0.0);
+                InventoryItem newItem = new(0, "New Item", 0, 0.0);
 
                 _database.AddItem(newItem, _currentUser.UserId_);
 
@@ -247,7 +247,7 @@ namespace InventoryTracker
                 }
 
                 // Create an instance of the UserRegistrationWindow
-                UserRegistrationWindow registrationWindow = new UserRegistrationWindow();
+                UserRegistrationWindow registrationWindow = new();
 
                 // Show the registration window as a dialog
                 bool? result = registrationWindow.ShowDialog();

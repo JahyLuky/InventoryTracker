@@ -76,8 +76,8 @@ namespace InventoryTracker.ViewModels
         /// </summary>
         public MainViewModel()
         {
-            _inventoryItems = new ObservableCollection<InventoryItem>();
-            SetOriginalItems(); // Initialize _originalItems
+            _inventoryItems = [];
+            SetOriginalItems();
         }
 
         /// <summary>

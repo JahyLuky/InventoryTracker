@@ -75,20 +75,18 @@ namespace InventoryTracker.Models
         {
             string sql = "INSERT INTO Inventory (Name, Quantity, Price, UserId) VALUES (@Name, @Quantity, @Price, @UserId); SELECT last_insert_rowid();";
 
-            using (SQLiteCommand cmd = new SQLiteCommand(sql, _connection))
-            {
-                cmd.Parameters.AddWithValue("@Name", newItem.Name);
-                cmd.Parameters.AddWithValue("@Quantity", newItem.Quantity);
-                cmd.Parameters.AddWithValue("@Price", newItem.Price);
-                cmd.Parameters.AddWithValue("@UserId", userId);
+            using SQLiteCommand cmd = new(sql, _connection);
+            cmd.Parameters.AddWithValue("@Name", newItem.Name);
+            cmd.Parameters.AddWithValue("@Quantity", newItem.Quantity);
+            cmd.Parameters.AddWithValue("@Price", newItem.Price);
+            cmd.Parameters.AddWithValue("@UserId", userId);
 
-                int newId = Convert.ToInt32(cmd.ExecuteScalar());
-                if (newId <= 0)
-                {
-                    Debug.WriteLine($"\n\n!!!!!!!!!!newID = {newId}\n\n");
-                }
-                newItem.Id = newId;
+            int newId = Convert.ToInt32(cmd.ExecuteScalar());
+            if (newId <= 0)
+            {
+                Debug.WriteLine($"\n\n!!!!!!!!!!newID = {newId}\n\n");
             }
+            newItem.Id = newId;
         }
 
 
@@ -101,22 +99,19 @@ namespace InventoryTracker.Models
         {
             string sql = "SELECT Id, Name, Quantity, Price FROM Inventory WHERE Id = @Id;";
 
-            using (SQLiteCommand cmd = new SQLiteCommand(sql, _connection))
+            using (SQLiteCommand cmd = new(sql, _connection))
             {
                 cmd.Parameters.AddWithValue("@Id", id);
 
-                using (SQLiteDataReader reader = cmd.ExecuteReader())
+                using SQLiteDataReader reader = cmd.ExecuteReader();
+                if (reader.Read())
                 {
-                    if (reader.Read())
-                    {
-                        InventoryItem item = new InventoryItem(
-                            Convert.ToInt32(reader["Id"]), Convert.ToString(reader["Name"]), Convert.ToInt32(reader["Quantity"]), Convert.ToDouble(reader["Price"]));
+                    InventoryItem item = new(
+                        Convert.ToInt32(reader["Id"]), Convert.ToString(reader["Name"]), Convert.ToInt32(reader["Quantity"]), Convert.ToDouble(reader["Price"]));
 
-                        return item;
-                    }
+                    return item;
                 }
             }
-
             throw new Exception();
         }
 
@@ -128,16 +123,14 @@ namespace InventoryTracker.Models
         {
             string sql = "UPDATE Inventory SET Name = @Name, Quantity = @Quantity, Price = @Price WHERE Id = @Id AND UserId = @UserId;";
 
-            using (SQLiteCommand cmd = new SQLiteCommand(sql, _connection))
-            {
-                cmd.Parameters.AddWithValue("@Name", updatedItem.Name);
-                cmd.Parameters.AddWithValue("@Quantity", updatedItem.Quantity);
-                cmd.Parameters.AddWithValue("@Price", updatedItem.Price);
-                cmd.Parameters.AddWithValue("@Id", updatedItem.Id);
-                cmd.Parameters.AddWithValue("@UserId", userId);
+            using SQLiteCommand cmd = new(sql, _connection);
+            cmd.Parameters.AddWithValue("@Name", updatedItem.Name);
+            cmd.Parameters.AddWithValue("@Quantity", updatedItem.Quantity);
+            cmd.Parameters.AddWithValue("@Price", updatedItem.Price);
+            cmd.Parameters.AddWithValue("@Id", updatedItem.Id);
+            cmd.Parameters.AddWithValue("@UserId", userId);
 
-                cmd.ExecuteNonQuery();
-            }
+            cmd.ExecuteNonQuery();
         }
 
         /// <summary>
@@ -148,13 +141,11 @@ namespace InventoryTracker.Models
         {
             string sql = "DELETE FROM Inventory WHERE Id = @Id AND UserId = @UserId;";
 
-            using (SQLiteCommand cmd = new SQLiteCommand(sql, _connection))
-            {
-                cmd.Parameters.AddWithValue("@Id", itemId);
-                cmd.Parameters.AddWithValue("@UserId", userId);
+            using SQLiteCommand cmd = new(sql, _connection);
+            cmd.Parameters.AddWithValue("@Id", itemId);
+            cmd.Parameters.AddWithValue("@UserId", userId);
 
-                cmd.ExecuteNonQuery();
-            }
+            cmd.ExecuteNonQuery();
         }
 
         /// <summary>
@@ -163,23 +154,21 @@ namespace InventoryTracker.Models
         /// <returns>A list of all inventory items.</returns>
         public List<InventoryItem> GetAllItems(long userId)
         {
-            List<InventoryItem> items = new List<InventoryItem>();
+            List<InventoryItem> items = new();
 
             string sql = "SELECT Id, Name, Quantity, Price FROM Inventory WHERE UserId = @UserId;";
 
-            using (SQLiteCommand cmd = new SQLiteCommand(sql, _connection))
+            using (SQLiteCommand cmd = new(sql, _connection))
             {
                 cmd.Parameters.AddWithValue("@UserId", userId);
 
-                using (SQLiteDataReader reader = cmd.ExecuteReader())
+                using SQLiteDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
                 {
-                    while (reader.Read())
-                    {
-                        InventoryItem item = new InventoryItem(
-                            Convert.ToInt32(reader["Id"]), Convert.ToString(reader["Name"]), Convert.ToInt32(reader["Quantity"]), Convert.ToDouble(reader["Price"]));
+                    InventoryItem item = new(
+                        Convert.ToInt32(reader["Id"]), Convert.ToString(reader["Name"]), Convert.ToInt32(reader["Quantity"]), Convert.ToDouble(reader["Price"]));
 
-                        items.Add(item);
-                    }
+                    items.Add(item);
                 }
             }
 
@@ -193,10 +182,8 @@ namespace InventoryTracker.Models
         /// <param name="sql">The SQL command to execute.</param>
         private void ExecuteNonQuery(string sql)
         {
-            using (SQLiteCommand cmd = new SQLiteCommand(sql, _connection))
-            {
-                cmd.ExecuteNonQuery();
-            }
+            using SQLiteCommand cmd = new(sql, _connection);
+            cmd.ExecuteNonQuery();
         }
     }
 }

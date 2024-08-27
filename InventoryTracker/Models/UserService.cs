@@ -27,7 +27,7 @@ namespace InventoryTracker.Models
         /// Gets the path to the SQLite database file.
         /// </summary>
         /// <returns>The database file path.</returns>
-        private string GetDatabasePath()
+        private static string GetDatabasePath()
         {
             return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "InventoryDatabase.sqlite");
         }
@@ -37,14 +37,12 @@ namespace InventoryTracker.Models
         /// </summary>
         private void InitializeDatabase()
         {
-            using (var connection = new SQLiteConnection(_dbConnectionString))
-            {
-                connection.Open();
+            using var connection = new SQLiteConnection(_dbConnectionString);
+            connection.Open();
 
-                CreateUsersTable(connection);
-                CreateSessionsTable(connection);
-                CreateInventoryTable(connection);
-            }
+            CreateUsersTable(connection);
+            CreateSessionsTable(connection);
+            CreateInventoryTable(connection);
         }
 
         /// <summary>
@@ -105,15 +103,13 @@ namespace InventoryTracker.Models
         /// </summary>
         private void InitializeAdmin()
         {
-            using (var connection = new SQLiteConnection(_dbConnectionString))
+            using var connection = new SQLiteConnection(_dbConnectionString);
+            connection.Open();
+            if (!UsernameExists(connection, "admin"))
             {
-                connection.Open();
-                if (!UsernameExists(connection, "admin"))
-                {
-                    string salt;
-                    string hashedPassword = _passwordHasher.HashPassword("admin", out salt);
-                    CreateUser(connection, "admin", hashedPassword, salt, "Admin");
-                }
+                string salt;
+                string hashedPassword = _passwordHasher.HashPassword("admin", out salt);
+                CreateUser(connection, "admin", hashedPassword, salt, "Admin");
             }
         }
 
@@ -129,15 +125,13 @@ namespace InventoryTracker.Models
             string salt;
             string hashedPassword = _passwordHasher.HashPassword(password, out salt);
 
-            using (var connection = new SQLiteConnection(_dbConnectionString))
+            using var connection = new SQLiteConnection(_dbConnectionString);
+            connection.Open();
+            if (UsernameExists(connection, username))
             {
-                connection.Open();
-                if (UsernameExists(connection, username))
-                {
-                    return false;
-                }
-                return CreateUser(connection, username, hashedPassword, salt, role);
+                return false;
             }
+            return CreateUser(connection, username, hashedPassword, salt, role);
         }
 
         /// <summary>
@@ -149,54 +143,46 @@ namespace InventoryTracker.Models
         /// <param name="salt">The salt used for hashing the password.</param>
         /// <param name="role">The role.</param>
         /// <returns>True if the user was created successfully, otherwise false.</returns>
-        private bool CreateUser(SQLiteConnection connection, string username, string passwordHash, string salt, string role)
+        private static bool CreateUser(SQLiteConnection connection, string username, string passwordHash, string salt, string role)
         {
             string sql = @"
                 INSERT INTO Users (Username, PasswordHash, Salt, Role)
                 VALUES (@Username, @PasswordHash, @Salt, @Role);";
 
-            using (SQLiteCommand cmd = new SQLiteCommand(sql, connection))
-            {
-                cmd.Parameters.AddWithValue("@Username", username);
-                cmd.Parameters.AddWithValue("@PasswordHash", passwordHash);
-                cmd.Parameters.AddWithValue("@Salt", salt);
-                cmd.Parameters.AddWithValue("@Role", role);
+            using SQLiteCommand cmd = new(sql, connection);
+            cmd.Parameters.AddWithValue("@Username", username);
+            cmd.Parameters.AddWithValue("@PasswordHash", passwordHash);
+            cmd.Parameters.AddWithValue("@Salt", salt);
+            cmd.Parameters.AddWithValue("@Role", role);
 
-                try
-                {
-                    cmd.ExecuteNonQuery();
-                    return true;
-                }
-                catch (SQLiteException ex)
-                {
-                    Console.WriteLine($"Error creating user: {ex.Message}");
-                    return false;
-                }
+            try
+            {
+                cmd.ExecuteNonQuery();
+                return true;
+            }
+            catch (SQLiteException ex)
+            {
+                Console.WriteLine($"Error creating user: {ex.Message}");
+                return false;
             }
         }
 
         public long GetUserID(string username)
         {
             string sql = "SELECT UserId FROM Users WHERE Username = @Username;";
-            using (var connection = new SQLiteConnection(_dbConnectionString))
+            using var connection = new SQLiteConnection(_dbConnectionString);
+            connection.Open();
+
+            using SQLiteCommand cmd = new(sql, connection);
+            cmd.Parameters.AddWithValue("@Username", username);
+
+            using SQLiteDataReader reader = cmd.ExecuteReader();
+            if (reader.Read())
             {
-                connection.Open();
-
-                using (SQLiteCommand cmd = new SQLiteCommand(sql, connection))
+                object userIdObj = reader["UserId"];
+                if (userIdObj != DBNull.Value)
                 {
-                    cmd.Parameters.AddWithValue("@Username", username);
-
-                    using (SQLiteDataReader reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            object userIdObj = reader["UserId"];
-                            if (userIdObj != DBNull.Value)
-                            {
-                                return Convert.ToInt64(userIdObj);
-                            }
-                        }
-                    }
+                    return Convert.ToInt64(userIdObj);
                 }
             }
             return 0;
@@ -214,31 +200,25 @@ namespace InventoryTracker.Models
         {
             string sql = "SELECT * FROM Users WHERE Username = @Username;";
 
-            using (var connection = new SQLiteConnection(_dbConnectionString))
+            using var connection = new SQLiteConnection(_dbConnectionString);
+            connection.Open();
+
+            using SQLiteCommand cmd = new(sql, connection);
+            cmd.Parameters.AddWithValue("@Username", username);
+
+            using SQLiteDataReader reader = cmd.ExecuteReader();
+            if (reader.Read())
             {
-                connection.Open();
+                string storedHash = reader["PasswordHash"].ToString();
+                string storedSalt = reader["Salt"].ToString();
 
-                using (SQLiteCommand cmd = new SQLiteCommand(sql, connection))
+                // Verify password
+                if (_passwordHasher.VerifyPassword(password, storedHash, storedSalt))
                 {
-                    cmd.Parameters.AddWithValue("@Username", username);
-
-                    using (SQLiteDataReader reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            string storedHash = reader["PasswordHash"].ToString();
-                            string storedSalt = reader["Salt"].ToString();
-
-                            // Verify password
-                            if (_passwordHasher.VerifyPassword(password, storedHash, storedSalt))
-                            {
-                                // Successful login, log session
-                                CurrentUserId = Convert.ToInt64(reader["UserId"]);
-                                LogSession(connection, CurrentUserId);
-                                return true;
-                            }
-                        }
-                    }
+                    // Successful login, log session
+                    CurrentUserId = Convert.ToInt64(reader["UserId"]);
+                    LogSession(connection, CurrentUserId);
+                    return true;
                 }
             }
             return false;
@@ -252,16 +232,12 @@ namespace InventoryTracker.Models
             // Update the latest session for the current user with LogoutTime
             string sql = "UPDATE Sessions SET LogoutTime = CURRENT_TIMESTAMP WHERE UserId = @UserId AND LogoutTime IS NULL;";
 
-            using (var connection = new SQLiteConnection(_dbConnectionString))
-            {
-                connection.Open();
+            using var connection = new SQLiteConnection(_dbConnectionString);
+            connection.Open();
 
-                using (SQLiteCommand cmd = new SQLiteCommand(sql, connection))
-                {
-                    cmd.Parameters.AddWithValue("@UserId", CurrentUserId);
-                    cmd.ExecuteNonQuery();
-                }
-            }
+            using SQLiteCommand cmd = new(sql, connection);
+            cmd.Parameters.AddWithValue("@UserId", CurrentUserId);
+            cmd.ExecuteNonQuery();
         }
 
         /// <summary>
@@ -270,7 +246,7 @@ namespace InventoryTracker.Models
         /// <returns>A list of usernames.</returns>
         public List<string> GetAllUsernames()
         {
-            List<string> usernames = new List<string>();
+            List<string> usernames = new();
 
             string sql = "SELECT Username FROM Users;";
 
@@ -278,16 +254,12 @@ namespace InventoryTracker.Models
             {
                 connection.Open();
 
-                using (SQLiteCommand cmd = new SQLiteCommand(sql, connection))
+                using SQLiteCommand cmd = new(sql, connection);
+                using SQLiteDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
                 {
-                    using (SQLiteDataReader reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            string username = reader["Username"].ToString();
-                            usernames.Add(username);
-                        }
-                    }
+                    string username = reader["Username"].ToString();
+                    usernames.Add(username);
                 }
             }
 
@@ -300,16 +272,14 @@ namespace InventoryTracker.Models
         /// <param name="connection">The SQLite connection.</param>
         /// <param name="username">The username to check.</param>
         /// <returns>True if the username exists, otherwise false.</returns>
-        private bool UsernameExists(SQLiteConnection connection, string username)
+        private static bool UsernameExists(SQLiteConnection connection, string username)
         {
             string sql = "SELECT COUNT(*) FROM Users WHERE Username = @Username;";
 
-            using (SQLiteCommand cmd = new SQLiteCommand(sql, connection))
-            {
-                cmd.Parameters.AddWithValue("@Username", username);
-                long count = (long)cmd.ExecuteScalar();
-                return count > 0;
-            }
+            using SQLiteCommand cmd = new(sql, connection);
+            cmd.Parameters.AddWithValue("@Username", username);
+            long count = (long)cmd.ExecuteScalar();
+            return count > 0;
         }
 
         /// <summary>
@@ -317,16 +287,14 @@ namespace InventoryTracker.Models
         /// </summary>
         /// <param name="connection">The SQLite connection.</param>
         /// <param name="userId">The user ID.</param>
-        private void LogSession(SQLiteConnection connection, long userId)
+        private static void LogSession(SQLiteConnection connection, long userId)
         {
             // Insert new session record
             string sql = "INSERT INTO Sessions (UserId) VALUES (@UserId);";
 
-            using (SQLiteCommand cmd = new SQLiteCommand(sql, connection))
-            {
-                cmd.Parameters.AddWithValue("@UserId", userId);
-                cmd.ExecuteNonQuery();
-            }
+            using SQLiteCommand cmd = new(sql, connection);
+            cmd.Parameters.AddWithValue("@UserId", userId);
+            cmd.ExecuteNonQuery();
         }
 
         /// <summary>
@@ -336,10 +304,8 @@ namespace InventoryTracker.Models
         /// <param name="sql">The SQL command.</param>
         private void ExecuteNonQuery(SQLiteConnection connection, string sql)
         {
-            using (SQLiteCommand cmd = new SQLiteCommand(sql, connection))
-            {
-                cmd.ExecuteNonQuery();
-            }
+            using SQLiteCommand cmd = new(sql, connection);
+            cmd.ExecuteNonQuery();
         }
 
         /// <summary>
@@ -351,16 +317,12 @@ namespace InventoryTracker.Models
         {
             string sql = "SELECT Role FROM Users WHERE Username = @Username;";
 
-            using (var connection = new SQLiteConnection(_dbConnectionString))
-            {
-                connection.Open();
+            using var connection = new SQLiteConnection(_dbConnectionString);
+            connection.Open();
 
-                using (SQLiteCommand cmd = new SQLiteCommand(sql, connection))
-                {
-                    cmd.Parameters.AddWithValue("@Username", username);
-                    return cmd.ExecuteScalar()?.ToString();
-                }
-            }
+            using SQLiteCommand cmd = new(sql, connection);
+            cmd.Parameters.AddWithValue("@Username", username);
+            return cmd.ExecuteScalar()?.ToString();
         }
 
         /// <summary>
