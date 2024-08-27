@@ -49,7 +49,7 @@ namespace InventoryTracker
         {
             try
             {
-                var itemsFromDb = _database.GetAllItems(_currentUser.UserId);
+                var itemsFromDb = _database.GetAllItems(_currentUser.UserId_);
                 _viewModel.InventoryItems.Clear();
                 foreach (var item in itemsFromDb)
                 {
@@ -93,7 +93,7 @@ namespace InventoryTracker
                                 break;
                         }
 
-                        _database.UpdateItem(editedItem, _currentUser.UserId);
+                        _database.UpdateItem(editedItem, _currentUser.UserId_);
                     }
                 }
             }
@@ -177,7 +177,7 @@ namespace InventoryTracker
 
                 InventoryItem newItem = new InventoryItem(0, "New Item", 0, 0.0);
 
-                _database.AddItem(newItem, _currentUser.UserId);
+                _database.AddItem(newItem, _currentUser.UserId_);
 
                 newItem = _database.GetItem(newItem.Id);
 
@@ -197,7 +197,7 @@ namespace InventoryTracker
                 if (selectedRow != null)
                 {
                     _viewModel.DeleteItem(selectedRow.Id);
-                    _database.DeleteItem(selectedRow.Id, _currentUser.UserId);
+                    _database.DeleteItem(selectedRow.Id, _currentUser.UserId_);
                 }
             }
             catch (Exception ex)
@@ -213,7 +213,7 @@ namespace InventoryTracker
             {
                 foreach (var updatedItem in _viewModel.InventoryItems)
                 {
-                    _database.UpdateItem(updatedItem, _currentUser.UserId);
+                    _database.UpdateItem(updatedItem, _currentUser.UserId_);
                 }
 
                 LoadItemsFromDatabase();
@@ -292,17 +292,18 @@ namespace InventoryTracker
                 string username = UsernameTextBox.Text;
                 string password = PasswordTextBox.Password;
 
-                bool loggedIn = _userService.Login(username, password, out bool isAdmin);
+                bool loggedIn = _userService.Login(username, password);
                 if (loggedIn)
                 {
-                    _currentUser = new User { Username = username };
-                    _currentUser.UserId = _userService.GetUserID(_currentUser.Username);
-                    _userService.CurrentUserId = _currentUser.UserId;
-                    SessionInfoTextBlock.Text = $"Logged in as {_currentUser.Username}";
+                    long UserId = _userService.GetUserID(username);
+                    string role = _userService.GetRole(username);
+                    _currentUser = new User(UserId, username, role);
+                    _userService.CurrentUserId = _currentUser.UserId_;
+                    SessionInfoTextBlock.Text = $"Logged in as {_currentUser.Username_}";
 
                     _viewModel.IsLoggedIn = true;
 
-                    Debug.WriteLine($"\n\n!!!!!!!!!!!!!!!!! _currentUser.UserId {_currentUser.UserId}\n\n");
+                    Debug.WriteLine($"\n\n!!!!!!!!!!!!!!!!! _currentUser.UserId {_currentUser.UserId_}\n\n");
 
                     LoadItemsFromDatabase();
                 }
@@ -357,11 +358,11 @@ namespace InventoryTracker
                     return;
                 }
 
-                // Check admin status again before opening window
-                bool isAdmin = _userService.IsAdmin(_currentUser.Username);
-                if (isAdmin)
+                string isAdmin = _currentUser.Role_;
+                if (isAdmin == "admin")
                 {
-                    var userListWindow = new UserListWindow(isAdmin);
+                    // TODO: change UserListWindow to use Roles instead of bool
+                    var userListWindow = new UserListWindow(true);
                     userListWindow.ShowDialog();
                 }
                 else

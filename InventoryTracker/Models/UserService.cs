@@ -1,5 +1,4 @@
 ﻿using System.Data.SQLite;
-using System.Diagnostics;
 using System.IO;
 
 namespace InventoryTracker.Models
@@ -211,7 +210,7 @@ namespace InventoryTracker.Models
         /// <param name="password">The password.</param>
         /// <param name="isAdmin">Outputs whether the user has admin privileges.</param>
         /// <returns>True if login was successful, otherwise false.</returns>
-        public bool Login(string username, string password, out bool isAdmin)
+        public bool Login(string username, string password)
         {
             string sql = "SELECT * FROM Users WHERE Username = @Username;";
 
@@ -236,15 +235,12 @@ namespace InventoryTracker.Models
                                 // Successful login, log session
                                 CurrentUserId = Convert.ToInt64(reader["UserId"]);
                                 LogSession(connection, CurrentUserId);
-                                isAdmin = IsAdminRole(reader["Role"].ToString());
                                 return true;
                             }
                         }
                     }
                 }
             }
-
-            isAdmin = false;
             return false;
         }
 
@@ -312,7 +308,6 @@ namespace InventoryTracker.Models
             {
                 cmd.Parameters.AddWithValue("@Username", username);
                 long count = (long)cmd.ExecuteScalar();
-                Debug.WriteLine($"!!!!!!!!!! Username: {username}, Count: {count}");
                 return count > 0;
             }
         }
@@ -352,7 +347,7 @@ namespace InventoryTracker.Models
         /// </summary>
         /// <param name="username">The username.</param>
         /// <returns>True if the user is an admin, otherwise false.</returns>
-        public bool IsAdmin(string username)
+        public string GetRole(string username)
         {
             string sql = "SELECT Role FROM Users WHERE Username = @Username;";
 
@@ -363,21 +358,9 @@ namespace InventoryTracker.Models
                 using (SQLiteCommand cmd = new SQLiteCommand(sql, connection))
                 {
                     cmd.Parameters.AddWithValue("@Username", username);
-
-                    string role = cmd.ExecuteScalar()?.ToString();
-                    return IsAdminRole(role);
+                    return cmd.ExecuteScalar()?.ToString();
                 }
             }
-        }
-
-        /// <summary>
-        /// Determines if the specified role is an admin role.
-        /// </summary>
-        /// <param name="role">The role to check.</param>
-        /// <returns>True if the role is admin, otherwise false.</returns>
-        private bool IsAdminRole(string role)
-        {
-            return role.Equals("Admin", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
