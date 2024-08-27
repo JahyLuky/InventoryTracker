@@ -36,7 +36,6 @@ namespace InventoryTracker
             try
             {
                 _database = new InventoryDatabase();
-                //LoadItemsFromDatabase();
             }
             catch (Exception ex)
             {
