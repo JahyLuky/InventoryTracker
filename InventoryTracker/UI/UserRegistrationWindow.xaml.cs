@@ -1,6 +1,7 @@
 ﻿using InventoryTracker.Models;
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace InventoryTracker.UI
 {
@@ -15,7 +16,12 @@ namespace InventoryTracker.UI
 
         private void RegistrationSaveButton_Click(object sender, RoutedEventArgs e)
         {
-            // Retrieve the text from TextBox and PasswordBox controls
+            if (SetRoleForUser.SelectedItem == null)
+            {
+                MessageBox.Show("Please select a role.");
+                return;
+            }
+
             string username = RegistrationUsernameTextBox.Text;
             string password = RegistrationPasswordBox.Password;
             string confirmPassword = RegistrationConfirmPasswordBox.Password;
@@ -23,8 +29,12 @@ namespace InventoryTracker.UI
             if (password == confirmPassword)
             {
                 _userService = new UserService();
-                bool UserCreated = _userService.CreateUser(username, password, "user");
-                Debug.WriteLine($"!!!!!!!!!! Username: {username}, UserCreated: {UserCreated}");
+                ComboBoxItem selectedItem = SetRoleForUser.SelectedItem as ComboBoxItem;
+                string selectedRole = selectedItem.Content.ToString();
+                bool UserCreated = _userService.CreateUser(username, password, selectedRole);
+
+                Debug.WriteLine($"!!!!!!!!!! Username: {username}, UserCreated: {UserCreated}, role: {selectedRole}");
+
                 if (UserCreated)
                 {
                     DialogResult = true;
