@@ -40,7 +40,6 @@ namespace InventoryTracker
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception occurred while connecting to database: {ex.Message}");
                 MessageBox.Show($"Error connecting to database: {ex.Message}");
             }
         }
@@ -60,7 +59,6 @@ namespace InventoryTracker
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception occurred while loading items from database: {ex.Message}");
                 MessageBox.Show($"Error loading items from database: {ex.Message}");
             }
         }
@@ -99,7 +97,6 @@ namespace InventoryTracker
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception occurred while editing item: {ex.Message}");
                 MessageBox.Show($"Error editing item: {ex.Message}");
             }
         }
@@ -202,7 +199,6 @@ namespace InventoryTracker
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception occurred while deleting item: {ex.Message}");
                 MessageBox.Show($"Error deleting item: {ex.Message}");
             }
         }
@@ -220,7 +216,6 @@ namespace InventoryTracker
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception occurred while saving changes: {ex.Message}");
                 MessageBox.Show($"Error saving changes: {ex.Message}");
             }
         }
@@ -237,7 +232,6 @@ namespace InventoryTracker
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception occurred while canceling changes: {ex.Message}");
                 MessageBox.Show($"Error canceling changes: {ex.Message}");
             }
         }
@@ -272,7 +266,6 @@ namespace InventoryTracker
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception occurred during registration: {ex.Message}");
                 MessageBox.Show($"Error during registration: {ex.Message}");
             }
         }
@@ -284,7 +277,6 @@ namespace InventoryTracker
             {
                 if (_userService == null)
                 {
-                    Debug.WriteLine("UserService is not initialized.");
                     MessageBox.Show("UserService is not initialized.");
                     return;
                 }
@@ -314,7 +306,6 @@ namespace InventoryTracker
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception occurred during login: {ex.Message}");
                 MessageBox.Show($"Error during login: {ex.Message}");
             }
         }
@@ -325,7 +316,6 @@ namespace InventoryTracker
             {
                 if (_userService == null || _currentUser == null)
                 {
-                    Debug.WriteLine("UserService or CurrentUser is not initialized.");
                     MessageBox.Show("UserService or CurrentUser is not initialized.");
                     return;
                 }
@@ -343,7 +333,6 @@ namespace InventoryTracker
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception occurred during logout: {ex.Message}");
                 MessageBox.Show($"Error during logout: {ex.Message}");
             }
         }
@@ -372,7 +361,6 @@ namespace InventoryTracker
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception occurred while opening user list window: {ex.Message}");
                 MessageBox.Show($"Error opening user list window: {ex.Message}");
             }
         }

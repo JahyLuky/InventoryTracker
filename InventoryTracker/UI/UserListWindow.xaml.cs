@@ -10,8 +10,6 @@ namespace InventoryTracker.UI
     public partial class UserListWindow : Window
     {
         private UserService _userService;
-        private MainWindow _mainWindow;
-        private bool _isAdmin;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserListWindow"/> class.
