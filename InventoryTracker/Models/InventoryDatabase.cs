@@ -109,13 +109,8 @@ namespace InventoryTracker.Models
                 {
                     if (reader.Read())
                     {
-                        InventoryItem item = new InventoryItem
-                        {
-                            Id = Convert.ToInt32(reader["Id"]),
-                            Name = Convert.ToString(reader["Name"]),
-                            Quantity = Convert.ToInt32(reader["Quantity"]),
-                            Price = Convert.ToDouble(reader["Price"])
-                        };
+                        InventoryItem item = new InventoryItem(
+                            Convert.ToInt32(reader["Id"]), Convert.ToString(reader["Name"]), Convert.ToInt32(reader["Quantity"]), Convert.ToDouble(reader["Price"]));
 
                         return item;
                     }
@@ -180,13 +175,8 @@ namespace InventoryTracker.Models
                 {
                     while (reader.Read())
                     {
-                        InventoryItem item = new InventoryItem()
-                        {
-                            Id = Convert.ToInt32(reader["Id"]),
-                            Name = Convert.ToString(reader["Name"]),
-                            Quantity = Convert.ToInt32(reader["Quantity"]),
-                            Price = Convert.ToDouble(reader["Price"])
-                        };
+                        InventoryItem item = new InventoryItem(
+                            Convert.ToInt32(reader["Id"]), Convert.ToString(reader["Name"]), Convert.ToInt32(reader["Quantity"]), Convert.ToDouble(reader["Price"]));
 
                         items.Add(item);
                     }

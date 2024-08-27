@@ -86,13 +86,7 @@ namespace InventoryTracker.ViewModels
         public void SetOriginalItems()
         {
             _originalItems = new ObservableCollection<InventoryItem>(_inventoryItems.Select(item =>
-                new InventoryItem
-                {
-                    Id = item.Id,
-                    Name = item.Name,
-                    Quantity = item.Quantity,
-                    Price = item.Price
-                }));
+                new InventoryItem(item.Id, item.Name, item.Quantity, item.Price)));
         }
 
         /// <summary>

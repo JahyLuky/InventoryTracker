@@ -175,12 +175,7 @@ namespace InventoryTracker
                     return;
                 }
 
-                InventoryItem newItem = new InventoryItem
-                {
-                    Name = "New Item",
-                    Quantity = 0,
-                    Price = 0.0
-                };
+                InventoryItem newItem = new InventoryItem(0, "New Item", 0, 0.0);
 
                 _database.AddItem(newItem, _currentUser.UserId);
 
@@ -237,13 +232,7 @@ namespace InventoryTracker
                 _viewModel.InventoryItems.Clear();
                 foreach (var item in _viewModel.OriginalItems)
                 {
-                    _viewModel.AddItem(new InventoryItem
-                    {
-                        Id = item.Id,
-                        Name = item.Name,
-                        Quantity = item.Quantity,
-                        Price = item.Price
-                    });
+                    _viewModel.AddItem(new InventoryItem(item.Id, item.Name, item.Quantity, item.Price));
                 }
             }
             catch (Exception ex)
