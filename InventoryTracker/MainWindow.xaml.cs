@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using YourNamespace;
 
 namespace InventoryTracker
 {
@@ -346,16 +347,41 @@ namespace InventoryTracker
                     return;
                 }
 
-                string isAdmin = _currentUser.Role_;
-                if (isAdmin == "admin")
+                if (_currentUser.Role_ != "Admin")
                 {
-                    // TODO: change UserListWindow to use Roles instead of bool
-                    var userListWindow = new UserListWindow(true);
-                    userListWindow.ShowDialog();
+                    MessageBox.Show("You do not have permission to access this feature.");
+                    return;
+                }
+
+                // Open UserListWindow for admin
+                UserListWindow userListWindow = new UserListWindow();
+                bool? dialogResult = userListWindow.ShowDialog();
+
+                if (dialogResult == true)
+                {
+                    // Get the selected user from UserListWindow
+                    User selectedUser = userListWindow.SelectedUser;
+
+                    if (selectedUser == null)
+                    {
+                        MessageBox.Show("No user was selected.");
+                        return;
+                    }
+
+                    // Load the inventory for the selected user
+                    var itemsForSelectedUser = _database.GetAllItems(selectedUser.UserId_);
+                    _viewModel.InventoryItems.Clear();
+
+                    foreach (var item in itemsForSelectedUser)
+                    {
+                        _viewModel.AddItem(item);
+                    }
+
+                    MessageBox.Show($"Inventory for user '{selectedUser.Username_}' loaded successfully.");
                 }
                 else
                 {
-                    MessageBox.Show("You do not have permission to access this feature.");
+                    MessageBox.Show("User selection was cancelled.");
                 }
             }
             catch (Exception ex)
@@ -363,5 +389,6 @@ namespace InventoryTracker
                 MessageBox.Show($"Error opening user list window: {ex.Message}");
             }
         }
+
     }
 }

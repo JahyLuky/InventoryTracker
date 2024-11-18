@@ -267,6 +267,37 @@ namespace InventoryTracker.Models
         }
 
         /// <summary>
+        /// Retrieves all users from the database.
+        /// </summary>
+        /// <returns>A list of all users.</returns>
+        public List<User> GetAllUsers()
+        {
+            List<User> users = new();
+
+            string sql = "SELECT UserId, Username, Role FROM Users;";
+
+            using (var connection = new SQLiteConnection(_dbConnectionString))
+            {
+                connection.Open();
+
+                using SQLiteCommand cmd = new(sql, connection);
+                using SQLiteDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    var tempUser = new User(
+                        Convert.ToInt32(reader["UserId"]),
+                        reader["Username"].ToString(),
+                        reader["Role"].ToString()
+                    );
+
+                    users.Add(tempUser);
+                }
+            }
+
+            return users;
+        }
+
+        /// <summary>
         /// Checks if a username exists in the database.
         /// </summary>
         /// <param name="connection">The SQLite connection.</param>

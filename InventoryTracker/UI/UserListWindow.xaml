@@ -1,8 +1,23 @@
-<Window x:Class="InventoryTracker.UI.UserListWindow"
+﻿<Window x:Class="YourNamespace.UserListWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="User List" Height="300" Width="400">
+        Title="User List" Height="450" Width="800">
     <Grid>
-        <ListBox x:Name="UserListBox" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10"/>
+        <!-- DataGrid to Display Users -->
+        <DataGrid x:Name="UserListView" AutoGenerateColumns="False" 
+                  CanUserAddRows="False" SelectionMode="Single" 
+                  Margin="10" IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="User ID" Binding="{Binding UserId_}" Width="*"/>
+                <DataGridTextColumn Header="Username" Binding="{Binding Username_}" Width="*"/>
+                <DataGridTextColumn Header="Role" Binding="{Binding Role_}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Buttons -->
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10">
+            <Button Content="Confirm" Width="100" Margin="5" Click="ConfirmSelection_Click"/>
+            <Button Content="Cancel" Width="100" Margin="5" Click="Cancel_Click"/>
+        </StackPanel>
     </Grid>
 </Window>

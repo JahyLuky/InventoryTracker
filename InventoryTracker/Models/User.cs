@@ -4,7 +4,7 @@
     {
         public long UserId_ { get; set; }
         public string Username_ { get; set; }
-        public string Role_ { get; set; }  // New property to indicate admin status
+        public string Role_ { get; set; }
 
         public User(long UserId, string UserName, string Role)
         {

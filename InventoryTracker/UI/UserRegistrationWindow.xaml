@@ -42,10 +42,10 @@
                     <ComboBoxItem Content="Admin"/>
                 </ComboBox>
             </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                <TextBlock Text="Visitor - Read only" VerticalAlignment="Center" Width="120" FontStyle="Italic"/>
-                <TextBlock Text="User - Read/Write" VerticalAlignment="Center" Width="120" FontStyle="Italic"/>
-                <TextBlock Text="Admin - Read/Write" VerticalAlignment="Center" Width="120" FontStyle="Italic"/>
+            <StackPanel Orientation="Vertical" Margin="0,10,0,0" HorizontalAlignment="Left">
+                <TextBlock Text="Visitor: Read only (only UI)" Width="200" FontStyle="Italic"/>
+                <TextBlock Text="User: Read/Write (own database)" Width="200" FontStyle="Italic"/>
+                <TextBlock Text="Admin: Read/Write (all databases)" Width="200" FontStyle="Italic"/>
             </StackPanel>
         </StackPanel>
 

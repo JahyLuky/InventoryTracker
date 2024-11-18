@@ -1,51 +1,59 @@
 ﻿using InventoryTracker.Models;
-using System.Collections.ObjectModel;
 using System.Windows;
 
-namespace InventoryTracker.UI
+namespace YourNamespace
 {
-    /// <summary>
-    /// Interaction logic for UserListWindow.xaml
-    /// </summary>
     public partial class UserListWindow : Window
     {
+        // Property to store the selected user
+        public User SelectedUser { get; private set; }
         private UserService _userService;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserListWindow"/> class.
-        /// </summary>
-        /// <param name="isAdmin">Indicates whether the user is an admin.</param>
-        public UserListWindow(bool isAdmin)
+        public UserListWindow()
         {
             InitializeComponent();
             _userService = new UserService();
-
-            if (isAdmin)
-            {
-                LoadUsernames();
-            }
-            else
-            {
-                MessageBox.Show("Access denied. User is not admin.");
-                Close();
-            }
+            LoadUserList();
         }
 
-        /// <summary>
-        /// Loads the usernames from the user service and populates the ListBox.
-        /// </summary>
-        private void LoadUsernames()
+        // Method to load the list of users into the DataGrid
+        private void LoadUserList()
         {
             try
             {
-                var usernames = _userService.GetAllUsernames();
-                UserListBox.ItemsSource = new ObservableCollection<string>(usernames);
+                // Simulate fetching users from a database
+                List<User> users = _userService.GetAllUsers();
+
+                // Bind the user list to the DataGrid
+                UserListView.ItemsSource = users;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading usernames: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                Close();
+                MessageBox.Show($"Error loading users: {ex.Message}");
             }
+        }
+
+        // Event handler for Confirm button
+        private void ConfirmSelection_Click(object sender, RoutedEventArgs e)
+        {
+            // Get the selected user from the DataGrid
+            SelectedUser = UserListView.SelectedItem as User;
+
+            if (SelectedUser == null)
+            {
+                MessageBox.Show("Please select a user.");
+                return;
+            }
+
+            DialogResult = true;
+            Close();
+        }
+
+        // Event handler for Cancel button
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = false;
+            Close();
         }
     }
 }
