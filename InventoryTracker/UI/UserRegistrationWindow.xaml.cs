@@ -30,7 +30,8 @@ namespace InventoryTracker.UI
             {
                 _userService = new UserService();
                 ComboBoxItem selectedItem = SetRoleForUser.SelectedItem as ComboBoxItem;
-                string selectedRole = selectedItem.Content.ToString();
+                string selectedRoleString = selectedItem?.Content.ToString();
+                Enum.TryParse(selectedRoleString, true, out Roles selectedRole);
                 bool UserCreated = _userService.CreateUser(username, password, selectedRole);
 
                 Debug.WriteLine($"!!!!!!!!!! Username: {username}, UserCreated: {UserCreated}, role: {selectedRole}");

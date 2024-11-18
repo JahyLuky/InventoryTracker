@@ -109,7 +109,7 @@ namespace InventoryTracker.Models
             {
                 string salt;
                 string hashedPassword = _passwordHasher.HashPassword("admin", out salt);
-                CreateUser(connection, "admin", hashedPassword, salt, "Admin");
+                CreateUser(connection, "admin", hashedPassword, salt, Roles.Admin);
             }
         }
 
@@ -120,7 +120,7 @@ namespace InventoryTracker.Models
         /// <param name="password">The password.</param>
         /// <param name="role">The role.</param>
         /// <returns>True if the user was created successfully, otherwise false.</returns>
-        public bool CreateUser(string username, string password, string role)
+        public bool CreateUser(string username, string password, Roles role)
         {
             string salt;
             string hashedPassword = _passwordHasher.HashPassword(password, out salt);
@@ -143,7 +143,7 @@ namespace InventoryTracker.Models
         /// <param name="salt">The salt used for hashing the password.</param>
         /// <param name="role">The role.</param>
         /// <returns>True if the user was created successfully, otherwise false.</returns>
-        private static bool CreateUser(SQLiteConnection connection, string username, string passwordHash, string salt, string role)
+        private static bool CreateUser(SQLiteConnection connection, string username, string passwordHash, string salt, Roles role)
         {
             string sql = @"
                 INSERT INTO Users (Username, PasswordHash, Salt, Role)
@@ -284,10 +284,13 @@ namespace InventoryTracker.Models
                 using SQLiteDataReader reader = cmd.ExecuteReader();
                 while (reader.Read())
                 {
+                    string roleString = reader["Role"].ToString();
+                    Roles role = Enum.TryParse(roleString, true, out Roles parsedRole) ? parsedRole : Roles.Visitor;
+
                     var tempUser = new User(
                         Convert.ToInt32(reader["UserId"]),
                         reader["Username"].ToString(),
-                        reader["Role"].ToString()
+                        role
                     );
 
                     users.Add(tempUser);
@@ -344,7 +347,7 @@ namespace InventoryTracker.Models
         /// </summary>
         /// <param name="username">The username.</param>
         /// <returns>True if the user is an admin, otherwise false.</returns>
-        public string GetRole(string username)
+        public Roles GetRole(string username)
         {
             string sql = "SELECT Role FROM Users WHERE Username = @Username;";
 
@@ -353,7 +356,9 @@ namespace InventoryTracker.Models
 
             using SQLiteCommand cmd = new(sql, connection);
             cmd.Parameters.AddWithValue("@Username", username);
-            return cmd.ExecuteScalar()?.ToString();
+            var roleString = cmd.ExecuteScalar()?.ToString();
+            Enum.TryParse(roleString, true, out Roles role);
+            return role;
         }
 
         /// <summary>

@@ -10,6 +10,17 @@ namespace InventoryTracker.Utilities
         {
             if (value is bool isLoggedIn)
             {
+                bool showForRoleBased = parameter as string == "Visitor";
+                if (showForRoleBased)
+                {
+                    return Visibility.Visible;
+                }
+                showForRoleBased = parameter as string == "NotVisitor";
+                if (showForRoleBased)
+                {
+                    return Visibility.Collapsed;
+                }
+
                 bool showForLoggedIn = parameter as string == "IsLoggedIn";
                 return showForLoggedIn ? (isLoggedIn ? Visibility.Visible : Visibility.Collapsed) : (isLoggedIn ? Visibility.Collapsed : Visibility.Visible);
             }

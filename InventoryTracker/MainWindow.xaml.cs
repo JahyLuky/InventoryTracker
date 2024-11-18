@@ -26,6 +26,15 @@ namespace InventoryTracker
             DataContext = _viewModel;
         }
 
+        ~MainWindow()
+        {
+            _viewModel.InventoryItems.Clear();
+            foreach (var item in _viewModel.OriginalItems)
+            {
+                _viewModel.AddItem(new InventoryItem(item.Id, item.Name, item.Quantity, item.Price));
+            }
+        }
+
         private void InitializeViewModel()
         {
             _viewModel = new MainViewModel();
@@ -288,7 +297,7 @@ namespace InventoryTracker
                 if (loggedIn)
                 {
                     long UserId = _userService.GetUserID(username);
-                    string role = _userService.GetRole(username);
+                    Roles role = _userService.GetRole(username);
                     _currentUser = new User(UserId, username, role);
                     _userService.CurrentUserId = _currentUser.UserId_;
                     SessionInfoTextBlock.Text = $"Logged in as {_currentUser.Username_}";
@@ -347,7 +356,7 @@ namespace InventoryTracker
                     return;
                 }
 
-                if (_currentUser.Role_ != "Admin")
+                if (_currentUser.Role_ != Roles.Admin)
                 {
                     MessageBox.Show("You do not have permission to access this feature.");
                     return;
