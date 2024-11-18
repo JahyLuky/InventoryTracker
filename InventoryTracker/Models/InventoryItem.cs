@@ -8,6 +8,14 @@ namespace InventoryTracker.Models
     /// </summary>
     public class InventoryItem : INotifyPropertyChanged
     {
+        public InventoryItem(int id, string itemname, int qauntity, double price)
+        {
+            _id = id;
+            _name = itemname;
+            _quantity = qauntity;
+            _price = price;
+        }
+
         /// <summary>
         /// Event raised when a property value changes.
         /// </summary>

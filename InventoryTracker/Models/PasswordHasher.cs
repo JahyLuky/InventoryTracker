@@ -24,11 +24,9 @@ namespace InventoryTracker.Models
             Array.Copy(passwordBytes, 0, combinedBytes, 0, passwordBytes.Length);
             Array.Copy(saltBytes, 0, combinedBytes, passwordBytes.Length, saltBytes.Length);
 
-            using (var sha256 = SHA256.Create())
-            {
-                byte[] hashedBytes = sha256.ComputeHash(combinedBytes);
-                return Convert.ToBase64String(hashedBytes);
-            }
+            using var sha256 = SHA256.Create();
+            byte[] hashedBytes = sha256.ComputeHash(combinedBytes);
+            return Convert.ToBase64String(hashedBytes);
         }
 
         /// <summary>
@@ -38,7 +36,7 @@ namespace InventoryTracker.Models
         private byte[] GenerateSalt()
         {
             byte[] salt = new byte[32];
-            using (var rng = new RNGCryptoServiceProvider())
+            using (var rng = RandomNumberGenerator.Create())
             {
                 rng.GetBytes(salt);
             }
@@ -62,11 +60,9 @@ namespace InventoryTracker.Models
             Array.Copy(enteredPasswordBytes, 0, combinedBytes, 0, enteredPasswordBytes.Length);
             Array.Copy(saltBytes, 0, combinedBytes, enteredPasswordBytes.Length, saltBytes.Length);
 
-            using (var sha256 = SHA256.Create())
-            {
-                byte[] hashedBytes = sha256.ComputeHash(combinedBytes);
-                return hashedEnteredPassword.SequenceEqual(hashedBytes);
-            }
+            using var sha256 = SHA256.Create();
+            byte[] hashedBytes = sha256.ComputeHash(combinedBytes);
+            return hashedEnteredPassword.SequenceEqual(hashedBytes);
         }
     }
 }

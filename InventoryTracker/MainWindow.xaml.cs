@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using YourNamespace;
 
 namespace InventoryTracker
 {
@@ -25,6 +26,15 @@ namespace InventoryTracker
             DataContext = _viewModel;
         }
 
+        ~MainWindow()
+        {
+            _viewModel.InventoryItems.Clear();
+            foreach (var item in _viewModel.OriginalItems)
+            {
+                _viewModel.AddItem(new InventoryItem(item.Id, item.Name, item.Quantity, item.Price));
+            }
+        }
+
         private void InitializeViewModel()
         {
             _viewModel = new MainViewModel();
@@ -36,11 +46,9 @@ namespace InventoryTracker
             try
             {
                 _database = new InventoryDatabase();
-                //LoadItemsFromDatabase();
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception occurred while connecting to database: {ex.Message}");
                 MessageBox.Show($"Error connecting to database: {ex.Message}");
             }
         }
@@ -49,7 +57,7 @@ namespace InventoryTracker
         {
             try
             {
-                var itemsFromDb = _database.GetAllItems(_currentUser.UserId);
+                var itemsFromDb = _database.GetAllItems(_currentUser.UserId_);
                 _viewModel.InventoryItems.Clear();
                 foreach (var item in itemsFromDb)
                 {
@@ -60,7 +68,6 @@ namespace InventoryTracker
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception occurred while loading items from database: {ex.Message}");
                 MessageBox.Show($"Error loading items from database: {ex.Message}");
             }
         }
@@ -93,13 +100,12 @@ namespace InventoryTracker
                                 break;
                         }
 
-                        _database.UpdateItem(editedItem, _currentUser.UserId);
+                        _database.UpdateItem(editedItem, _currentUser.UserId_);
                     }
                 }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception occurred while editing item: {ex.Message}");
                 MessageBox.Show($"Error editing item: {ex.Message}");
             }
         }
@@ -175,14 +181,9 @@ namespace InventoryTracker
                     return;
                 }
 
-                InventoryItem newItem = new InventoryItem
-                {
-                    Name = "New Item",
-                    Quantity = 0,
-                    Price = 0.0
-                };
+                InventoryItem newItem = new(0, "New Item", 0, 0.0);
 
-                _database.AddItem(newItem, _currentUser.UserId);
+                _database.AddItem(newItem, _currentUser.UserId_);
 
                 newItem = _database.GetItem(newItem.Id);
 
@@ -202,12 +203,11 @@ namespace InventoryTracker
                 if (selectedRow != null)
                 {
                     _viewModel.DeleteItem(selectedRow.Id);
-                    _database.DeleteItem(selectedRow.Id, _currentUser.UserId);
+                    _database.DeleteItem(selectedRow.Id, _currentUser.UserId_);
                 }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception occurred while deleting item: {ex.Message}");
                 MessageBox.Show($"Error deleting item: {ex.Message}");
             }
         }
@@ -218,14 +218,13 @@ namespace InventoryTracker
             {
                 foreach (var updatedItem in _viewModel.InventoryItems)
                 {
-                    _database.UpdateItem(updatedItem, _currentUser.UserId);
+                    _database.UpdateItem(updatedItem, _currentUser.UserId_);
                 }
 
                 LoadItemsFromDatabase();
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception occurred while saving changes: {ex.Message}");
                 MessageBox.Show($"Error saving changes: {ex.Message}");
             }
         }
@@ -237,18 +236,11 @@ namespace InventoryTracker
                 _viewModel.InventoryItems.Clear();
                 foreach (var item in _viewModel.OriginalItems)
                 {
-                    _viewModel.AddItem(new InventoryItem
-                    {
-                        Id = item.Id,
-                        Name = item.Name,
-                        Quantity = item.Quantity,
-                        Price = item.Price
-                    });
+                    _viewModel.AddItem(new InventoryItem(item.Id, item.Name, item.Quantity, item.Price));
                 }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception occurred while canceling changes: {ex.Message}");
                 MessageBox.Show($"Error canceling changes: {ex.Message}");
             }
         }
@@ -264,7 +256,7 @@ namespace InventoryTracker
                 }
 
                 // Create an instance of the UserRegistrationWindow
-                UserRegistrationWindow registrationWindow = new UserRegistrationWindow();
+                UserRegistrationWindow registrationWindow = new();
 
                 // Show the registration window as a dialog
                 bool? result = registrationWindow.ShowDialog();
@@ -283,7 +275,6 @@ namespace InventoryTracker
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception occurred during registration: {ex.Message}");
                 MessageBox.Show($"Error during registration: {ex.Message}");
             }
         }
@@ -295,7 +286,6 @@ namespace InventoryTracker
             {
                 if (_userService == null)
                 {
-                    Debug.WriteLine("UserService is not initialized.");
                     MessageBox.Show("UserService is not initialized.");
                     return;
                 }
@@ -303,17 +293,18 @@ namespace InventoryTracker
                 string username = UsernameTextBox.Text;
                 string password = PasswordTextBox.Password;
 
-                bool loggedIn = _userService.Login(username, password, out bool isAdmin);
+                bool loggedIn = _userService.Login(username, password);
                 if (loggedIn)
                 {
-                    _currentUser = new User { Username = username };
-                    _currentUser.UserId = _userService.GetUserID(_currentUser.Username);
-                    _userService.CurrentUserId = _currentUser.UserId;
-                    SessionInfoTextBlock.Text = $"Logged in as {_currentUser.Username}";
+                    long UserId = _userService.GetUserID(username);
+                    Roles role = _userService.GetRole(username);
+                    _currentUser = new User(UserId, username, role);
+                    _userService.CurrentUserId = _currentUser.UserId_;
+                    SessionInfoTextBlock.Text = $"Logged in as {_currentUser.Username_}";
 
                     _viewModel.IsLoggedIn = true;
 
-                    Debug.WriteLine($"\n\n!!!!!!!!!!!!!!!!! _currentUser.UserId {_currentUser.UserId}\n\n");
+                    Debug.WriteLine($"\n\n!!!!!!!!!!!!!!!!! _currentUser.UserId {_currentUser.UserId_}\n\n");
 
                     LoadItemsFromDatabase();
                 }
@@ -324,7 +315,6 @@ namespace InventoryTracker
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception occurred during login: {ex.Message}");
                 MessageBox.Show($"Error during login: {ex.Message}");
             }
         }
@@ -335,7 +325,6 @@ namespace InventoryTracker
             {
                 if (_userService == null || _currentUser == null)
                 {
-                    Debug.WriteLine("UserService or CurrentUser is not initialized.");
                     MessageBox.Show("UserService or CurrentUser is not initialized.");
                     return;
                 }
@@ -353,7 +342,6 @@ namespace InventoryTracker
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception occurred during logout: {ex.Message}");
                 MessageBox.Show($"Error during logout: {ex.Message}");
             }
         }
@@ -368,23 +356,48 @@ namespace InventoryTracker
                     return;
                 }
 
-                // Check admin status again before opening window
-                bool isAdmin = _userService.IsAdmin(_currentUser.Username);
-                if (isAdmin)
+                if (_currentUser.Role_ != Roles.Admin)
                 {
-                    var userListWindow = new UserListWindow(isAdmin);
-                    userListWindow.ShowDialog();
+                    MessageBox.Show("You do not have permission to access this feature.");
+                    return;
+                }
+
+                // Open UserListWindow for admin
+                UserListWindow userListWindow = new UserListWindow();
+                bool? dialogResult = userListWindow.ShowDialog();
+
+                if (dialogResult == true)
+                {
+                    // Get the selected user from UserListWindow
+                    User selectedUser = userListWindow.SelectedUser;
+
+                    if (selectedUser == null)
+                    {
+                        MessageBox.Show("No user was selected.");
+                        return;
+                    }
+
+                    // Load the inventory for the selected user
+                    var itemsForSelectedUser = _database.GetAllItems(selectedUser.UserId_);
+                    _viewModel.InventoryItems.Clear();
+
+                    foreach (var item in itemsForSelectedUser)
+                    {
+                        _viewModel.AddItem(item);
+                    }
+
+                    MessageBox.Show($"Inventory for user '{selectedUser.Username_}' loaded successfully.");
                 }
                 else
                 {
-                    MessageBox.Show("You do not have permission to access this feature.");
+                    MessageBox.Show("User selection was cancelled.");
                 }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception occurred while opening user list window: {ex.Message}");
                 MessageBox.Show($"Error opening user list window: {ex.Message}");
             }
         }
+
     }
 }
